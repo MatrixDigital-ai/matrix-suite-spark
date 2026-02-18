@@ -1,5 +1,6 @@
 import { Upload, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const ResumeScanVisual = () => (
   <div className="relative w-full max-w-sm mx-auto">
@@ -37,6 +38,7 @@ const ResumeScanVisual = () => (
 );
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       {/* Subtle background grid */}
@@ -66,7 +68,7 @@ const HeroSection = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <Button variant="cta-lg" size="lg" className="gap-3 px-8 py-6 text-lg rounded-xl">
+              <Button variant="cta-lg" size="lg" className="gap-3 px-8 py-6 text-lg rounded-xl" onClick={() => navigate("/analysis")}>
                 <Upload className="h-5 w-5" />
                 Upload Resume
               </Button>
