@@ -1,14 +1,12 @@
-import { Upload, Linkedin } from "lucide-react";
+import { Upload, Linkedin, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useState, useCallback, useRef } from "react";
 
 const ResumeScanVisual = () => (
   <div className="relative w-full max-w-sm mx-auto">
     <div className="relative rounded-xl border border-border bg-card p-6 shadow-card overflow-hidden">
-      {/* Scan line animation */}
       <div className="absolute left-0 right-0 h-0.5 gradient-brand animate-scan-line opacity-60" />
-      
-      {/* Mock resume lines */}
       <div className="space-y-3">
         <div className="h-3 w-3/4 rounded bg-muted animate-pulse" />
         <div className="h-2 w-full rounded bg-muted/60" />
@@ -21,13 +19,9 @@ const ResumeScanVisual = () => (
         <div className="h-2 w-full rounded bg-muted/60" />
         <div className="h-2 w-2/3 rounded bg-muted/60" />
       </div>
-
-      {/* Decorative corner accents */}
       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary/40 rounded-tl-xl" />
       <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-magenta/40 rounded-br-xl" />
     </div>
-
-    {/* Floating badges */}
     <div className="absolute -top-3 -right-3 rounded-lg gradient-brand px-3 py-1.5 text-xs font-semibold text-primary-foreground animate-pulse-glow">
       AI Scanning...
     </div>
@@ -39,12 +33,41 @@ const ResumeScanVisual = () => (
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleFile = useCallback(() => {
+    navigate("/scanning");
+  }, [navigate]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFile();
+    }
+  }, [handleFile]);
+
+  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFile();
+    }
+  }, [handleFile]);
+
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-      {/* Subtle background grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40" />
-      
-      {/* Gradient orbs */}
       <div className="absolute top-20 -left-32 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-20 -right-32 w-96 h-96 rounded-full bg-magenta/5 blur-3xl" />
 
@@ -68,7 +91,12 @@ const HeroSection = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <Button variant="cta-lg" size="lg" className="gap-3 px-8 py-6 text-lg rounded-xl" onClick={() => navigate("/analysis")}>
+              <Button
+                variant="cta-lg"
+                size="lg"
+                className="gap-3 px-8 py-6 text-lg rounded-xl"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 <Upload className="h-5 w-5" />
                 Upload Resume
               </Button>
@@ -76,9 +104,38 @@ const HeroSection = () => {
                 <Linkedin className="h-5 w-5" />
                 Link LinkedIn
               </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+                onChange={handleFileInput}
+              />
             </div>
 
-            <div className="flex items-center gap-6 text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "0.4s" }}>
+            {/* Drag & Drop Zone */}
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`animate-fade-in cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-300 ${
+                isDragging
+                  ? "border-primary bg-primary/5 scale-[1.02]"
+                  : "border-border hover:border-primary/40 hover:bg-primary/[0.02]"
+              }`}
+              style={{ animationDelay: "0.4s" }}
+            >
+              <FileText className={`h-10 w-10 mx-auto mb-3 transition-colors ${isDragging ? "text-primary" : "text-muted-foreground/50"}`} />
+              <p className="text-sm font-medium text-foreground">
+                {isDragging ? "Drop your resume here" : "Drag & drop your resume here"}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Supports PDF, DOC, DOCX
+              </p>
+            </div>
+
+            <div className="flex items-center gap-6 text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "0.5s" }}>
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 10,000+ profiles analyzed
